@@ -1,46 +1,40 @@
-import { Table, Button, Space } from 'antd';
+import { Table, Button, Space, Pagination } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
 import UserEditModal from '../UserEditModal/UserEditModal';
 import AddUserModal from '../AddUserModal/AddUserModal';
+import SearchBar from '../SearchBar/SearchBar';
 
 const { Column } = Table;
-
-const LoadMore = ({ visible, users, setUsers, currPage, setCurrPage }) => {
-    const [newUsers, setNewUsers] = useState([]);
-
-    if(!visible)
-        return;
-
-    const onClick = () => {
-        fetch('http://localhost:3000/users/all', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                page: currPage + 1
-            }),
-        })
-        .then((data) => {
-          setCurrPage(data.page);
-          setNewUsers(data.users);
-        });
-
-        const newSet = users.concat(newUsers);
-        setUsers(newSet);
-        window.location.reload();
-    };
-    
-    return (<Button onClick={onClick} type='link'>Load more...</Button>)
-}
 
 const UsersList = ({ users, setUsers, currPage, setCurrPage }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [userToEdit, setUserToEdit] = useState({});
-    const [loadMore, setLoadMore] = useState(true);
-    useEffect(() => setLoadMore(users.length % 10 == 0));
+    const [total, setTotal] = useState();
+    useEffect(() => {
+        fetch('http://localhost:3000/users/count')
+        .then((res) => { return res.json() })
+        .then((data) => setTotal(data.page_count))});
+
+    const onChangePage = (page, _) => {
+        fetch('http://localhost:3000/users/all', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                page: page,
+            }),
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            setCurrPage(data.page);
+            setUsers(data.users);
+          });
+    };
 
     const handleEditPress = (user) => {
         setUserToEdit(user);
@@ -75,6 +69,7 @@ const UsersList = ({ users, setUsers, currPage, setCurrPage }) => {
         <Space direction='vertical' size='middle'>
             <UserEditModal shown={showEditModal} setShown={setShowEditModal} user={userToEdit} />
             <AddUserModal shown={showAddModal} setShown={setShowAddModal} />
+            <SearchBar />
             <Table dataSource={data} pagination={false}>
                 <Column title='Name' dataIndex='name' />
                 <Column title='Email' dataIndex='email' />
@@ -93,7 +88,7 @@ const UsersList = ({ users, setUsers, currPage, setCurrPage }) => {
             </Table>
             <Space size='large'>
                 <Button type='primary' onClick={() => setShowAddModal(true)}>Add New User</Button>
-                <LoadMore visible={loadMore} users={users} setUsers={setUsers} currPage={currPage} setCurrPage={setCurrPage} />
+                <Pagination defaultCurrent={currPage} total={total} onChange={onChangePage} simple />
             </Space>
         </Space>
     );

@@ -8,14 +8,22 @@ function App() {
   const [currPage, setCurrPage] = useState(0);
 
   useEffect(() => {
-    fetch('http://localhost:3000/users/all')
-      .then((res) => {
-        return res.json();
-      })
-      .then((data) => {
-        setCurrPage(data.page);
-        setUsers(data.users);
-      });
+    fetch('http://localhost:3000/users/all', {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          page: 1
+      }),
+    })
+    .then((res) => {
+      return res.json();
+    })
+    .then((data) => {
+      setCurrPage(data.page);
+      setUsers(data.users);
+    });
   }, []);
 
   return (<UsersList users={users} setUsers={setUsers} currPage={currPage} setCurrPage={setCurrPage} />);
