@@ -27,15 +27,12 @@ const validatePhone = (phone) => {
     return pattern.test(phone);
 }
 
-const UserEditModal = ({ shown, setShown, user }) => {
+const UserEditModal = ({ shown, setShown }) => {
     const [showAlert, setShowAlert] = useState(false);
     const [success, setSuccess] = useState(true);
-    const [name, setName] = useState(user.name);
-    const [email, setEmail] = useState(user.email);
-    const [phone, setPhone] = useState(user.phone);
-    useEffect(() => { setName(user.name) }, [user]);
-    useEffect(() => { setEmail(user.email) }, [user]);
-    useEffect(() => { setPhone(user.phone) }, [user]);
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
 
     const handleOk = () => {
         if(!(validateName(name) && validateEmail(email) && validatePhone(phone))) {
@@ -44,13 +41,12 @@ const UserEditModal = ({ shown, setShown, user }) => {
             return;
         }
 
-        fetch('http://localhost:3000/users/update', {
-            method: 'PATCH',
+        fetch('http://localhost:3000/users/add', {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                id: user.id,
                 name: name,
                 email: email,
                 phone: phone
@@ -75,7 +71,7 @@ const UserEditModal = ({ shown, setShown, user }) => {
     }
 
     return (
-        <Modal title='Edit user' open={shown} onOk={handleOk} onCancel={handleCancel} destroyOnClose={true}>
+        <Modal title='Add user' open={shown} onOk={handleOk} onCancel={handleCancel} destroyOnClose={true}>
             <Alerter show={showAlert} />
             <Form>
                 <Form.Item label='Name'>
