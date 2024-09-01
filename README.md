@@ -1,4 +1,4 @@
-# Project purpose
+## Project purpose
 
 This is a project created as practice. To be used to display data provided by https://github.com/lesovitsa/user_list_api
 
